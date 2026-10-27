@@ -9,7 +9,9 @@ const subs = new Set<() => void>(); let version = 0;
 const bump = () => { version++; subs.forEach(f => f()); };
 const w = (c: T.Id) => { const x = worlds[c]; if (!x) throw new Error(`Кампания ${c} не найдена`); return x; };
 const writable = (c: T.Id) => { if (campaigns.find(k => k.id === c)?.status === 'archived') throw new Error('Кампания в архиве: изменения недоступны'); };
-type Coll = 'quests' | 'npcs' | 'chronicle';
+type Coll = 'quests' | 'npcs' | 'chronicle' | 'notes';
+// Demo-level filter in the DATA layer (not UI): players never receive secret markers. Real protection = server/RLS.
+const hidden = (c: T.Id) => { const me = members.find(m => m.campaignId === c && m.userId === 'u-demo'); return new Set(me && me.role !== 'player' ? [] : w(c).markers.filter(m => m.secret).map(m => m.locationId)); };
 function upsert(c: T.Id, k: Coll, rec: { id?: T.Id }, prefix: string) {
   writable(c); const list = w(c)[k] as { id: T.Id; campaignId: T.Id }[];
   const i = rec.id ? list.findIndex(x => x.id === rec.id) : -1;
@@ -27,14 +29,14 @@ export const demoRepo: AtlasRepository = {
     const c: T.Campaign = { id, name: i.name, description: i.description, coverImage: '', status: 'active', createdAt: t, updatedAt: t };
     campaigns.push(c); members.push({ id: uid('m'), campaignId: id, userId: 'u-demo', displayName: 'Вы', role: 'owner' });
     const v = structuredClone(WORLDS['camp-ember'].maps[0].original);
-    worlds[id] = { maps: [{ id: `${id}-map`, campaignId: id, name: 'Первая карта', parentMapId: null, original: v, playerSafe: null }], locations: [], markers: [], quests: [], npcs: [], chronicle: [], links: [] };
+    worlds[id] = { maps: [{ id: `${id}-map`, campaignId: id, name: 'Первая карта', parentMapId: null, original: v, playerSafe: null }], locations: [], markers: [], notes: [], quests: [], npcs: [], chronicle: [], links: [] };
     bump(); return c;
   },
   async setCampaignStatus(id, s) { const c = campaigns.find(k => k.id === id); if (c) { c.status = s; c.updatedAt = new Date().toISOString(); } bump(); },
-  getMember: c => delay(members.find(m => m.campaignId === c)),
+  getMember: c => delay(members.find(m => m.campaignId === c && m.userId === 'u-demo')),
   listMaps: c => delay(w(c).maps),
-  listLocations: c => delay(w(c).locations),
-  listMarkers: (c, mapId) => delay(w(c).markers.filter(m => m.mapId === mapId)),
+  listLocations: c => delay(w(c).locations.filter(l => !hidden(c).has(l.id))),
+  listMarkers: (c, mapId) => delay(w(c).markers.filter(m => m.mapId === mapId && !hidden(c).has(m.locationId))),
   async addMarker(c, i) {
     writable(c); const lid = uid('loc'), W = w(c);
     W.locations.push({ id: lid, campaignId: c, name: i.name, description: i.description, kind: i.kind, status: i.status });
@@ -51,5 +53,11 @@ export const demoRepo: AtlasRepository = {
   async deleteNpc(c, id) { remove(c, 'npcs', id); },
   async saveChronicle(c, e) { upsert(c, 'chronicle', e, 'ch'); },
   async deleteChronicle(c, id) { remove(c, 'chronicle', id); },
+  async listNotes(c) { return structuredClone(w(c).notes.filter(n => !n.locationId || !hidden(c).has(n.locationId))); },
+  async saveNote(c, n) { upsert(c, 'notes', { ...n, authorId: 'u-demo', createdAt: new Date().toISOString() }, 'n'); },
+  async deleteNote(c, id) { remove(c, 'notes', id); },
+  listMembers: c => delay(members.filter(m => m.campaignId === c)),
+  async setDemoRole(c, role) { const m = members.find(x => x.campaignId === c && x.userId === 'u-demo'); if (m) m.role = role; bump(); },
+  async setMarkerSecret(c, id, secret) { writable(c); const m = w(c).markers.find(x => x.id === id); if (m) m.secret = secret; bump(); },
   listQuests: c => delay(w(c).quests), listNpcs: c => delay(w(c).npcs), listChronicle: c => delay(w(c).chronicle), listLinks: c => delay(w(c).links),
 };

@@ -11,7 +11,7 @@ export default function CampaignLayout({ children }: { children: React.ReactNode
   return (
     <>
       <div className="page" style={{ paddingBottom: 0 }}>
-        <div className="row"><Link href="/">← Кампании</Link><b style={{ flex: 1 }}>{c?.name ?? '…'}</b>
+        <div className="row"><Link href="/">← Кампании</Link><b style={{ flex: 1 }}>{c?.name ?? '…'}</b><Link href={`/c/${id}/settings`} aria-label="Участники и доступ">⚙</Link>
           {c && <span className="badge">{m?.role} · {c.status === 'archived' ? 'архив, только чтение' : 'активна'}</span>}
           {can(m, c, 'archive_campaign') && <button onClick={() => repo.setCampaignStatus(id, 'archived')}>В архив</button>}
           {c?.status === 'archived' && m?.role === 'owner' && <button onClick={() => repo.setCampaignStatus(id, 'active')}>Вернуть</button>}</div>

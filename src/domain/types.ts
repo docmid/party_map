@@ -15,10 +15,8 @@ export interface Marker { id: Id; campaignId: Id; mapId: Id; locationId: Id; x: 
 export interface Quest { id: Id; campaignId: Id; title: string; summary: string; status: 'active' | 'completed' | 'failed' }
 export interface Npc { id: Id; campaignId: Id; name: string; role: string; description: string; attitude: 'ally' | 'neutral' | 'hostile' }
 export interface ChronicleEntry { id: Id; campaignId: Id; session: number; title: string; text: string; date: string }
-export interface Note { id: Id; campaignId: Id; authorId: Id; text: string }
+export interface Note { id: Id; campaignId: Id; authorId: Id; locationId: Id | null; text: string; createdAt: string }
 export type EntityType = 'location' | 'npc' | 'quest' | 'chronicle' | 'map';
 export interface EntityLink { id: Id; campaignId: Id; from: { type: EntityType; id: Id }; to: { type: EntityType; id: Id }; label: string }
 export interface AuditEntry { id: Id; campaignId: Id; userId: Id; action: string; entity: { type: string; id: Id }; at: string }
-// Fog of war: TYPES ONLY in stage 1. No editor, no rendering, no hiding.
-export interface FogRegion { id: Id; campaignId: Id; mapId: Id; polygon: { x: number; y: number }[]; state: 'closed' | 'open'; updatedBy: Id; updatedAt: string }
-export interface FogEvent { id: Id; campaignId: Id; regionId: Id; from: 'closed' | 'open'; to: 'closed' | 'open'; by: Id; at: string }
+export type { FogRegion, FogEvent } from '@/fog/types';
