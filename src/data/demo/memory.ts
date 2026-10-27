@@ -17,7 +17,7 @@ function upsert(c: T.Id, k: Coll, rec: { id?: T.Id }, prefix: string) {
   else list.push({ ...rec, id: uid(prefix), campaignId: c } as (typeof list)[number]);
   bump();
 }
-function remove(c: T.Id, k: Coll, id: T.Id) { writable(c); const W = w(c); (W[k] as { id: T.Id }[]) = (W[k] as { id: T.Id }[]).filter(x => x.id !== id); W.links = W.links.filter(l => l.from.id !== id && l.to.id !== id); bump(); }
+function remove(c: T.Id, k: Coll, id: T.Id) { writable(c); const W = w(c); (W as unknown as Record<Coll, { id: T.Id }[]>)[k] = (W[k] as { id: T.Id }[]).filter(x => x.id !== id); W.links = W.links.filter(l => l.from.id !== id && l.to.id !== id); bump(); }
 export const demoRepo: AtlasRepository = {
   subscribe: cb => { subs.add(cb); return () => { subs.delete(cb); }; },
   getVersion: () => version,
