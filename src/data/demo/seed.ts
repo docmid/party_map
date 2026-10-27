@@ -22,7 +22,7 @@ function world(c: string, p: string, d: D) {
 const C = (id: string, name: string, description: string, status: T.CampaignStatus): T.Campaign => ({ id, name, description, coverImage: '', status, createdAt: now, updatedAt: now });
 export const CAMPAIGNS = [C('camp-ember', 'Пепел Эмбервуда', 'Лесное королевство, культ огня и пропавший принц.', 'active'), C('camp-tide', 'Проклятие Сольмара', 'Морская кампания: острова, контрабандисты, левиафан.', 'active'), C('camp-old', 'Забытый курган', 'Завершённая короткая кампания.', 'archived')];
 const M = (id: string, c: string, role: T.Role): T.CampaignMember => ({ id, campaignId: c, userId: 'u-demo', displayName: 'Вы', role });
-export const MEMBERS = [M('m1', 'camp-ember', 'gm'), M('m2', 'camp-tide', 'player'), M('m3', 'camp-old', 'owner'), { id: 'm4', campaignId: 'camp-ember', userId: 'u-anya', displayName: 'Аня', role: 'player' }, { id: 'm5', campaignId: 'camp-ember', userId: 'u-igor', displayName: 'Игорь', role: 'owner' }, { id: 'm6', campaignId: 'camp-tide', userId: 'u-igor', displayName: 'Игорь', role: 'gm' }];
+export const MEMBERS: T.CampaignMember[] = [M('m1', 'camp-ember', 'gm'), M('m2', 'camp-tide', 'player'), M('m3', 'camp-old', 'owner'), { id: 'm4', campaignId: 'camp-ember', userId: 'u-anya', displayName: 'Аня', role: 'player' }, { id: 'm5', campaignId: 'camp-ember', userId: 'u-igor', displayName: 'Игорь', role: 'owner' }, { id: 'm6', campaignId: 'camp-tide', userId: 'u-igor', displayName: 'Игорь', role: 'gm' }];
 export const WORLDS: Record<string, ReturnType<typeof world>> = {
   'camp-ember': world('camp-ember', 'em', {
     maps: [['w', 'Королевство Эмбервуд', null, '#2f5d46', '#14301f'], ['t', 'Город Карамир', 'w', '#6b5a3c', '#2b2418']],
