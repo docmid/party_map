@@ -4,7 +4,7 @@ export type CampaignStatus = 'active' | 'archived';
 export interface Campaign { id: Id; name: string; description: string; coverImage: string; status: CampaignStatus; createdAt: string; updatedAt: string }
 export type Role = 'owner' | 'gm' | 'player';
 export interface CampaignMember { id: Id; campaignId: Id; userId: Id; displayName: string; role: Role }
-export type Permission = 'manage_maps' | 'manage_fog_of_war' | 'manage_members' | 'view_secret' | 'add_markers' | 'edit_markers' | 'delete_markers' | 'edit_shared' | 'archive_campaign';
+export type Permission = 'manage_maps' | 'manage_fog_of_war' | 'manage_members' | 'view_secret' | 'add_markers' | 'edit_markers' | 'delete_markers' | 'edit_shared' | 'archive_campaign' | 'delete_records';
 // Coordinates are normalized 0..1 relative to the ORIGINAL image.
 export interface MapImageVariant { kind: 'original' | 'player_safe'; url: string; width: number; height: number }
 export interface GameMap { id: Id; campaignId: Id; name: string; parentMapId: Id | null; original: MapImageVariant; playerSafe: MapImageVariant | null }

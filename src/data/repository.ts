@@ -1,4 +1,5 @@
 import type * as T from '@/domain/types';
+export type Draft<E> = Omit<E, 'id' | 'campaignId'> & { id?: T.Id };
 // A future Supabase implementation must satisfy this. Every call is scoped by campaignId.
 export interface AtlasRepository {
   subscribe(cb: () => void): () => void;
@@ -16,5 +17,11 @@ export interface AtlasRepository {
   listQuests(c: T.Id): Promise<T.Quest[]>;
   listNpcs(c: T.Id): Promise<T.Npc[]>;
   listChronicle(c: T.Id): Promise<T.ChronicleEntry[]>;
+  saveQuest(c: T.Id, q: Draft<T.Quest>): Promise<void>;
+  deleteQuest(c: T.Id, id: T.Id): Promise<void>;
+  saveNpc(c: T.Id, n: Draft<T.Npc>): Promise<void>;
+  deleteNpc(c: T.Id, id: T.Id): Promise<void>;
+  saveChronicle(c: T.Id, e: Draft<T.ChronicleEntry>): Promise<void>;
+  deleteChronicle(c: T.Id, id: T.Id): Promise<void>;
   listLinks(c: T.Id): Promise<T.EntityLink[]>;
 }

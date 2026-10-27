@@ -9,6 +9,15 @@ const subs = new Set<() => void>(); let version = 0;
 const bump = () => { version++; subs.forEach(f => f()); };
 const w = (c: T.Id) => { const x = worlds[c]; if (!x) throw new Error(`Кампания ${c} не найдена`); return x; };
 const writable = (c: T.Id) => { if (campaigns.find(k => k.id === c)?.status === 'archived') throw new Error('Кампания в архиве: изменения недоступны'); };
+type Coll = 'quests' | 'npcs' | 'chronicle';
+function upsert(c: T.Id, k: Coll, rec: { id?: T.Id }, prefix: string) {
+  writable(c); const list = w(c)[k] as { id: T.Id; campaignId: T.Id }[];
+  const i = rec.id ? list.findIndex(x => x.id === rec.id) : -1;
+  if (i >= 0) list[i] = { ...rec, id: rec.id!, campaignId: c } as (typeof list)[number];
+  else list.push({ ...rec, id: uid(prefix), campaignId: c } as (typeof list)[number]);
+  bump();
+}
+function remove(c: T.Id, k: Coll, id: T.Id) { writable(c); const W = w(c); (W[k] as { id: T.Id }[]) = (W[k] as { id: T.Id }[]).filter(x => x.id !== id); W.links = W.links.filter(l => l.from.id !== id && l.to.id !== id); bump(); }
 export const demoRepo: AtlasRepository = {
   subscribe: cb => { subs.add(cb); return () => { subs.delete(cb); }; },
   getVersion: () => version,
@@ -36,5 +45,11 @@ export const demoRepo: AtlasRepository = {
     Object.assign(l, patch); const k = patch.kind; if (k) w(c).markers.filter(m => m.locationId === id).forEach(m => { m.kind = k; }); bump();
   },
   async deleteMarker(c, id) { writable(c); const W = w(c); const m = W.markers.find(x => x.id === id); W.markers = W.markers.filter(x => x.id !== id); if (m) W.locations = W.locations.filter(l => l.id !== m.locationId); bump(); },
+  async saveQuest(c, q) { upsert(c, 'quests', q, 'q'); },
+  async deleteQuest(c, id) { remove(c, 'quests', id); },
+  async saveNpc(c, n) { upsert(c, 'npcs', n, 'npc'); },
+  async deleteNpc(c, id) { remove(c, 'npcs', id); },
+  async saveChronicle(c, e) { upsert(c, 'chronicle', e, 'ch'); },
+  async deleteChronicle(c, id) { remove(c, 'chronicle', id); },
   listQuests: c => delay(w(c).quests), listNpcs: c => delay(w(c).npcs), listChronicle: c => delay(w(c).chronicle), listLinks: c => delay(w(c).links),
 };
