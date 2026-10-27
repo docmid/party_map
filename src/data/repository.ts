@@ -24,7 +24,7 @@ export interface AtlasRepository {
   saveChronicle(c: T.Id, e: Draft<T.ChronicleEntry>): Promise<void>;
   deleteChronicle(c: T.Id, id: T.Id): Promise<void>;
   listNotes(c: T.Id): Promise<T.Note[]>;
-  saveNote(c: T.Id, n: Draft<T.Note>): Promise<void>;
+  saveNote(c: T.Id, n: { id?: T.Id; locationId: T.Id | null; text: string }): Promise<void>;
   deleteNote(c: T.Id, id: T.Id): Promise<void>;
   listMembers(c: T.Id): Promise<T.CampaignMember[]>;
   /** DEMO ONLY: lets you test role-dependent UI. Real roles come from the server. */
