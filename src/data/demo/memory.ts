@@ -54,7 +54,7 @@ export const demoRepo: AtlasRepository = {
   async saveChronicle(c, e) { upsert(c, 'chronicle', e, 'ch'); },
   async deleteChronicle(c, id) { remove(c, 'chronicle', id); },
   async listNotes(c) { return structuredClone(w(c).notes.filter(n => !n.locationId || !hidden(c).has(n.locationId))); },
-  async saveNote(c, n) { upsert(c, 'notes', { ...n, authorId: 'u-demo', createdAt: new Date().toISOString() }, 'n'); },
+  async saveNote(c, n) { const rec = { ...n, authorId: 'u-demo', createdAt: new Date().toISOString() }; upsert(c, 'notes', rec, 'n'); },
   async deleteNote(c, id) { remove(c, 'notes', id); },
   listMembers: c => delay(members.filter(m => m.campaignId === c)),
   async setDemoRole(c, role) { const m = members.find(x => x.campaignId === c && x.userId === 'u-demo'); if (m) m.role = role; bump(); },
